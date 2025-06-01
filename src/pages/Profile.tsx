@@ -1,0 +1,340 @@
+import { useState, useRef } from 'react';
+import { Building, Mail, MapPin, Phone, Upload, User, Users } from 'lucide-react';
+
+const Profile = () => {
+  const [profileData, setProfileData] = useState({
+    name: 'Michael Anderson',
+    email: 'michael.anderson@company.com',
+    phone: '+1 (555) 123-4567',
+    department: 'Design',
+    role: 'Senior UI Designer',
+    location: 'San Francisco, CA',
+    joinDate: '2020-03-15',
+    status: 'Active',
+    bio: 'Experienced UI Designer with a passion for creating intuitive and beautiful user interfaces.',
+    avatar: null,
+  });
+  
+  const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditing(false);
+    // Here you would normally save the data to the server
+  };
+  
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setProfileData(prev => ({
+          ...prev,
+          avatar: event.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+  
+  const manager = {
+    name: 'Jane Smith',
+    role: 'Design Director',
+    avatar: null
+  };
+  
+  const teamMembers = [
+    { id: 1, name: 'Alex Johnson', role: 'UI Designer', avatar: null },
+    { id: 2, name: 'Sam Williams', role: 'UI Designer', avatar: null },
+    { id: 3, name: 'Taylor Brown', role: 'Junior Designer', avatar: null },
+  ];
+  
+  return (
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">My Profile</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card flex flex-col items-center p-6">
+          <div className="relative mb-4">
+            <div 
+              className="h-32 w-32 rounded-full flex items-center justify-center overflow-hidden cursor-pointer"
+              onClick={handlePhotoClick}
+            >
+              {profileData.avatar ? (
+                <img 
+                  src={profileData.avatar} 
+                  alt={profileData.name} 
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-green-100 dark:bg-green-800 flex items-center justify-center text-green-600 dark:text-green-300">
+                  <User size={64} />
+                </div>
+              )}
+            </div>
+            <button 
+              className="absolute bottom-0 right-0 bg-white dark:bg-gray-700 p-2 rounded-full shadow-md border border-gray-200 dark:border-gray-600"
+              onClick={handlePhotoClick}
+            >
+              <Upload size={18} className="text-green-600 dark:text-green-400" />
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handlePhotoChange} 
+              className="hidden" 
+              accept="image/*"
+            />
+          </div>
+          
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">{profileData.name}</h2>
+          <p className="text-gray-500 dark:text-gray-400">{profileData.role}</p>
+          
+          <div className="mt-4 w-full">
+            <div className="flex items-center justify-between py-2 border-b dark:border-gray-700">
+              <span className="text-gray-500 dark:text-gray-400">Status</span>
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
+                {profileData.status}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between py-2 border-b dark:border-gray-700">
+              <span className="text-gray-500 dark:text-gray-400">Join Date</span>
+              <span className="text-gray-800 dark:text-gray-200">
+                {new Date(profileData.joinDate).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="md:col-span-2 card">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Personal Information</h2>
+            <button 
+              onClick={() => setEditing(!editing)}
+              className="btn btn-outline"
+            >
+              {editing ? 'Cancel' : 'Edit Profile'}
+            </button>
+          </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={profileData.email}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Phone
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={profileData.phone}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Department
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Building size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="department"
+                    value={profileData.department}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Role
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="role"
+                    value={profileData.role}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Location
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MapPin size={16} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="location"
+                    value={profileData.location}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Status
+                </label>
+                <div className="relative">
+                  <select
+                    name="status"
+                    value={profileData.status}
+                    onChange={handleChange}
+                    disabled={!editing}
+                    className="w-full pl-4 pr-10 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="On Leave">On Leave</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Bio
+              </label>
+              <textarea
+                name="bio"
+                value={profileData.bio}
+                onChange={handleChange}
+                disabled={!editing}
+                rows={4}
+                className="w-full px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 disabled:opacity-75 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+              />
+            </div>
+            
+            {editing && (
+              <div className="flex justify-end">
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+        
+        <div className="card md:col-span-3">
+          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Team Hierarchy</h2>
+          
+          <div className="mb-6">
+            <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center">
+              <Users size={16} className="mr-2" /> Reports To
+            </h3>
+            <div className="flex items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                {manager.avatar ? (
+                  <img src={manager.avatar} alt={manager.name} className="h-12 w-12 rounded-full" />
+                ) : (
+                  <span className="font-medium text-lg">{manager.name.charAt(0)}</span>
+                )}
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 dark:text-white">{manager.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{manager.role}</p>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center">
+            <Users size={16} className="mr-2" /> Team Members
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center">
+                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                  {member.avatar ? (
+                    <img src={member.avatar} alt={member.name} className="h-10 w-10 rounded-full" />
+                  ) : (
+                    <span className="font-medium">{member.name.charAt(0)}</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 dark:text-white">{member.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{member.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

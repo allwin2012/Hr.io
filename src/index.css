@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #228B22;
+  --color-primary-dark: #1A6B1A;
+  --color-primary-light: #32CD32;
+  --transition-speed: 0.3s;
+}
+
+.dark {
+  --color-primary: #32CD32;
+}
+
+/* Theme Transition */
+*, *::before, *::after {
+  transition: background-color var(--transition-speed) ease-out, 
+              border-color var(--transition-speed) ease-out,
+              color var(--transition-speed) ease-out;
+}
+
+body {
+  @apply transition-colors duration-200;
+}
+
+.light {
+  @apply bg-white text-gray-900;
+}
+
+.dark {
+  @apply bg-gray-900 text-white;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 transition-all duration-200 hover:shadow-lg;
+}
+
+/* Animation */
+.fade-in {
+  @apply opacity-0 animate-[fadeIn_0.5s_ease-in-out_forwards];
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sidebar */
+.sidebar {
+  @apply fixed top-0 left-0 h-full bg-white dark:bg-gray-800 transition-all duration-300 z-20;
+}
+
+.sidebar-collapsed {
+  @apply w-[70px];
+}
+
+.sidebar-expanded {
+  @apply w-[250px];
+}
+
+.sidebar-item {
+  @apply flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200;
+}
+
+.sidebar-item.active {
+  @apply bg-green-50 dark:bg-gray-700 text-green-700 dark:text-green-400 font-medium;
+}
+
+/* Stats Card */
+.stats-card {
+  @apply card flex flex-col;
+}
+
+.stats-card-header {
+  @apply text-sm text-gray-500 dark:text-gray-400 mb-1;
+}
+
+.stats-card-value {
+  @apply text-2xl font-bold text-gray-800 dark:text-white;
+}
+
+.stats-card-footer {
+  @apply text-xs text-gray-500 dark:text-gray-400 mt-2;
+}
+
+/* Button Styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-green-600 hover:bg-green-700 text-white;
+}
+
+.btn-outline {
+  @apply border border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-gray-700;
+}
