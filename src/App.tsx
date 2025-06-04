@@ -60,6 +60,7 @@ function App() {
                       <Route path="/kudos" element={<PageContent page="kudos" />} />
                       <Route path="/settings" element={<PageContent page="settings" />} />
                       <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      <Route path='/hr-dashboard' element={<PageContent page='hr-dashboard' />} />
                     </Routes>
                   </Layout>
                 )

@@ -6,9 +6,9 @@ import Documents from '../../pages/Documents';
 import Salary from '../../pages/Salary';
 import Kudos from '../../pages/Kudos';
 import Settings from '../../pages/Settings';
-
+import HRDashboard from '../../pages/HRDashboard';
 type PageContentProps = {
-  page: 'dashboard' | 'profile' | 'leaves' | 'tasks' | 'documents' | 'salary' | 'kudos' | 'settings';
+  page: 'dashboard' | 'profile' | 'leaves' | 'tasks' | 'documents' | 'salary' | 'kudos' | 'settings' | 'hr-dashboard';
 };
 
 const PageContent = ({ page }: PageContentProps) => {
@@ -21,6 +21,7 @@ const PageContent = ({ page }: PageContentProps) => {
     case 'salary': return <Salary />;
     case 'kudos': return <Kudos />;
     case 'settings': return <Settings />;
+    case 'hr-dashboard': return <HRDashboard />;
     default: return <Dashboard />;
   }
 };

@@ -8,6 +8,11 @@ import AlertsCard from '../components/dashboard/AlertsCard';
 import KudosCard from '../components/dashboard/KudosCard';
 
 const Dashboard = () => {
+
+  const userName = localStorage.getItem('userName') || 'User';
+  const role = localStorage.getItem('userRole') || 'Employee';
+
+
   // Mock data
   const leaveChartData = [
     { name: 'Used', value: 8, color: '#32CD32' },
@@ -88,7 +93,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <WelcomeCard name="Michael" role="Senior UI Designer" />
+       <WelcomeCard name={userName} role={role} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard 

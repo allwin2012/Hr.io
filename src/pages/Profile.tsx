@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef ,useEffect} from 'react';
 import { Building, Mail, MapPin, Phone, Upload, User, Users } from 'lucide-react';
+import { useSnackbar } from '../contexts/SnackbarContext';
 
 const Profile = () => {
   const [profileData, setProfileData] = useState({
@@ -17,49 +18,129 @@ const Profile = () => {
   
   const [editing, setEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showSnackbar } = useSnackbar();
+  const [manager, setManager] = useState<any>(null);
+const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  setProfileData(prev => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+// API_BASE_URL is the base URL for the API
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setEditing(false);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+      method: 'PUT', // ✅ required!
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(profileData), // ✅ needed for PUT
+    });
+
+    if (!response.ok) throw new Error('Failed to save profile');
+
+    const updated = await response.json();
+    setProfileData(updated); // ✅ update UI
+    showSnackbar('Profile saved successfully', 'success');
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    showSnackbar('Failed to save profile', 'error');
+  }
+};
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setEditing(false);
-    // Here you would normally save the data to the server
-  };
-  
+
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
   };
   
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
+      const file = e.target.files[0];
+  
+      const formData = new FormData();
+      formData.append('avatar', file);
+  
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/upload-avatar`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        });
+  
+        if (!response.ok) throw new Error('Upload failed');
+  
+        const data = await response.json();
         setProfileData(prev => ({
           ...prev,
-          avatar: event.target?.result as string
+          avatar: data.avatarUrl, // this should be the returned file URL
         }));
-      };
-      reader.readAsDataURL(e.target.files[0]);
+        showSnackbar('Avatar uploaded successfully', 'success');
+      } catch (err) {
+        console.error('Upload error:', err);
+        showSnackbar('Failed to upload avatar', 'error');
+      }
     }
   };
   
-  const manager = {
-    name: 'Jane Smith',
-    role: 'Design Director',
-    avatar: null
+
+  // Top-level useEffect (NOT inside another function)
+useEffect(() => {
+  const fetchHierarchy = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/me/hierarchy`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch hierarchy');
+      const data = await response.json();
+      setManager(data.manager);
+      setTeamMembers(data.teamMembers);
+    } catch (err) {
+      console.error('Failed to fetch hierarchy:', err);
+    }
   };
+
+  fetchHierarchy();
+}, []);
+
   
-  const teamMembers = [
-    { id: 1, name: 'Alex Johnson', role: 'UI Designer', avatar: null },
-    { id: 2, name: 'Sam Williams', role: 'UI Designer', avatar: null },
-    { id: 3, name: 'Taylor Brown', role: 'Junior Designer', avatar: null },
-  ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+  
+        if (!response.ok) throw new Error('Failed to fetch profile');
+  
+        const data = await response.json();
+        setProfileData(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+  
+    fetchProfile();
+  }, []);
+
+
   
   return (
     <div className="max-w-4xl mx-auto">
@@ -74,7 +155,7 @@ const Profile = () => {
             >
               {profileData.avatar ? (
                 <img 
-                  src={profileData.avatar} 
+                src={`${API_BASE_URL}${profileData.avatar}`}
                   alt={profileData.name} 
                   className="h-full w-full object-cover"
                 />
@@ -297,17 +378,27 @@ const Profile = () => {
               <Users size={16} className="mr-2" /> Reports To
             </h3>
             <div className="flex items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
-                {manager.avatar ? (
-                  <img src={manager.avatar} alt={manager.name} className="h-12 w-12 rounded-full" />
-                ) : (
-                  <span className="font-medium text-lg">{manager.name.charAt(0)}</span>
-                )}
-              </div>
-              <div>
-                <p className="font-medium text-gray-800 dark:text-white">{manager.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{manager.role}</p>
-              </div>
+            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+  {manager ? (
+    manager.avatar ? (
+      <img src={`${API_BASE_URL}${manager.avatar}`} alt={manager.name} className="h-12 w-12 rounded-full" />
+    ) : (
+      <span className="font-medium text-lg">{manager.name?.charAt(0)}</span>
+    )
+  ) : (
+    <span className="text-sm text-gray-400">Loading...</span>
+  )}
+</div>
+
+<div>
+  <p className="font-medium text-gray-800 dark:text-white">
+    {manager ? manager.name : 'Loading...'}
+  </p>
+  <p className="text-sm text-gray-500 dark:text-gray-400">
+    {manager ? manager.role : ''}
+  </p>
+</div>
+
             </div>
           </div>
           
@@ -315,22 +406,37 @@ const Profile = () => {
             <Users size={16} className="mr-2" /> Team Members
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
-                  {member.avatar ? (
-                    <img src={member.avatar} alt={member.name} className="h-10 w-10 rounded-full" />
-                  ) : (
-                    <span className="font-medium">{member.name.charAt(0)}</span>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-white">{member.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{member.role}</p>
-                </div>
-              </div>
-            ))}
+  {teamMembers.length > 0 ? (
+    teamMembers.map((member) => (
+      <div key={member.id} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center">
+        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+          {member.avatar ? (
+            <img src={`${API_BASE_URL}${member.avatar}`} alt={member.name} className="h-10 w-10 rounded-full" />
+          ) : (
+            <span className="font-medium">{member.name.charAt(0)}</span>
+          )}
+        </div>
+        <div>
+          <p className="font-medium text-gray-800 dark:text-white">{member.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{member.role}</p>
+        </div>
+      </div>
+    ))
+  ) : (
+    <>
+      {[...Array(3)].map((_, idx) => (
+        <div key={idx} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center animate-pulse">
+          <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 mr-3"></div>
+          <div className="space-y-2">
+            <div className="h-4 w-24 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            <div className="h-3 w-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
           </div>
+        </div>
+      ))}
+    </>
+  )}
+</div>
+
         </div>
       </div>
     </div>

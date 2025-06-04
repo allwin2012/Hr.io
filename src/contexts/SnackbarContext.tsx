@@ -7,10 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import InfoIcon from '@mui/icons-material/Info';
-
+import { CheckCircle, Error, Info } from '@mui/icons-material';
 
 type SnackbarType = 'success' | 'error' | 'info';
 
@@ -66,7 +63,7 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
 export const useSnackbar = (): SnackbarContextType => {
   const context = useContext(SnackbarContext);
   if (!context) {
-    throw new Error('useSnackbar must be used within a SnackbarProvider');
+    throw new window.Error('useSnackbar must be used within a SnackbarProvider');
   }
   return context;
 };

@@ -17,6 +17,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     { path: '/salary', icon: DollarSign, label: 'Salary' },
     { path: '/kudos', icon: Award, label: 'Kudos' },
     { path: '/settings', icon: Settings, label: 'Settings' },
+    { path: '/hr-dashboard', icon: LayoutDashboard, label: 'HR Dashboard' },
   ];
 
   return (

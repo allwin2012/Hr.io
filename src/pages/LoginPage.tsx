@@ -29,7 +29,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [newPasswordMismatchError, setNewPasswordMismatchError] = useState('');
 
 
-
+  // getGreeting is the function that gets the greeting based on the time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
   // validatePassword is the function that validates the password
   const validatePassword = (pwd: string) => {
     const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -103,10 +109,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         const data = await response.json();
 
         if (response.ok) {
-          showSnackbar('Login successful!', 'success');
+          const userName = data.user.name;
+          const greeting = `Hi, ${getGreeting()} ${userName} 🌞`;
+          showSnackbar(greeting, 'success');
           localStorage.setItem('token', data.token);
           localStorage.setItem('userName', data.user.name); // ✅ correct
           localStorage.setItem('userEmail', data.user.email); // ✅ store email too
+          localStorage.setItem('userRole', data.user.role);
+          localStorage.setItem('userDepartment', data.user.department);
           onLogin(); // trigger parent login logic
         }
         else {

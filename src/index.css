@@ -49,7 +49,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  @apply fixed top-0 left-0 h-full bg-white dark:bg-gray-800 transition-all duration-300 z-20;
+  @apply  h-full bg-white dark:bg-gray-800 transition-all duration-300 z-10;
 }
 
 .sidebar-collapsed {
@@ -96,4 +96,55 @@ body {
 
 .btn-outline {
   @apply border border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-gray-700;
+}
+
+
+/*snackbar*/
+.snackbar {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+}
+/* Color themes */
+.snackbar-info {
+  background-color: #2b2b2b;
+  color: #ffffff;
+}
+
+.snackbar-success {
+  background-color: #32CD32; /* Lime Green */
+  color: #000000;
+}
+
+.snackbar-error {
+  background-color: #ff4d4f;
+  color: #ffffff;
+}
+
+/* Icon style */
+.snackbar-icon {
+  font-size: 24px;
+}
+/* Animations for snackbar */
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
