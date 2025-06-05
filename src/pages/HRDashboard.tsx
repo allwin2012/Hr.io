@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import EditEmployeeModal from '../components/Hr/EditEmployeeModal';
 import { User } from 'lucide-react';
+import { useSnackbar } from '../contexts/SnackbarContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,7 +18,11 @@ export type Employee = {
   } | string;
 };
 
+
+
 const HRDashboard = () => {
+
+  const { showSnackbar } = useSnackbar(); 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,8 +40,10 @@ const HRDashboard = () => {
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
       setEmployees(data);
+      showSnackbar('Employees fetched successfully', 'success');
     } catch (error) {
       console.error('Error fetching employees:', error);
+      showSnackbar('Error fetching employees', 'error');
     } finally {
       setLoading(false);
     }
@@ -45,6 +52,8 @@ const HRDashboard = () => {
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  
 
   const paginatedEmployees = employees.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -90,7 +99,14 @@ const HRDashboard = () => {
                   <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{emp.email}</td>
                   <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{emp.role}</td>
                   <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{emp.department}</td>
-                  <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{typeof emp.reportsTo === 'object' ? emp.reportsTo?.name : '-'}</td>
+                  <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                  {emp.reportsTo
+  ? typeof emp.reportsTo === 'object'
+    ? `${(emp.reportsTo as { name?: string }).name || 'Unnamed'}`
+    : `Mgr ID: ${emp.reportsTo}`
+  : 'No manager'}
+
+                    </td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => setSelectedEmployee(emp)}
