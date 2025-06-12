@@ -46,7 +46,11 @@ const LeaveReviewList = ({ leaveRequests, onStatusChange }: LeaveReviewListProps
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {leaveRequests.map(request => (
               <tr key={request._id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                <td className="px-6 py-4 flex items-center gap-2  space-x-7">
+                  <img  src={`${import.meta.env.VITE_API_BASE_URL}${request.employee?.avatar}`}
+    alt={request.employee?.name}
+    className="h-8 w-8 rounded-full object-cover"
+  />
                   {request.employee?.name || 'N/A'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">

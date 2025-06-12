@@ -1,4 +1,3 @@
-import { CirclePlus } from 'lucide-react';
 
 interface LeaveBalance {
   type: string;
