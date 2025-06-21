@@ -1,4 +1,4 @@
-import { Calendar, Check, Clock3, X } from 'lucide-react';
+import { Check, Clock3, X } from 'lucide-react';
 import { LeaveRequest } from '../leave/types';
 
 interface LeaveListProps {
@@ -54,7 +54,7 @@ const LeaveList = ({ leaveRequests }: LeaveListProps) => {
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {leaveRequests.map((request) => (
-              <tr key={request.id}>
+              <tr key={request._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {request.type}
                 </td>

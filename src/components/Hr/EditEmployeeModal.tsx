@@ -1,6 +1,6 @@
 // EditEmployeeModal.tsx
 import { useEffect, useState } from 'react';
-import { Employee } from './HRDashboard';
+import { Employee } from '../../pages/HRDashboard';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,7 +12,10 @@ interface Props {
 
 const EditEmployeeModal = ({ employee, onClose, onUpdate }: Props) => {
   const [role, setRole] = useState(employee.role);
-  const [managerId, setManagerId] = useState(employee.reportsTo || '');
+  const [managerId, setManagerId] = useState(
+    typeof employee.reportsTo === 'string' ? employee.reportsTo : 
+    typeof employee.reportsTo === 'object' && employee.reportsTo ? employee.reportsTo.name : ''
+  );
   const [users, setUsers] = useState<Employee[]>([]);
   const [saving, setSaving] = useState(false);
 

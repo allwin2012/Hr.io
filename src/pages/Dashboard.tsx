@@ -31,19 +31,13 @@ const Dashboard = () => {
     { month: 'Aug', salary: 5500 },
   ];
   
-  const manager = {
-    id: 1,
-    name: 'Jane Smith',
-    role: 'HR Director'
-  };
-  
-  const teamMembers = [
-    { id: 2, name: 'Alex Johnson', role: 'UI Designer' },
-    { id: 3, name: 'Sam Williams', role: 'Frontend Developer' },
-    { id: 4, name: 'Taylor Brown', role: 'Product Manager' },
-  ];
-  
-  const alerts = [
+  const alerts: Array<{
+    id: number;
+    title: string;
+    message: string;
+    type: 'document' | 'task' | 'appraisal';
+    dueDate: string;
+  }> = [
     { 
       id: 1, 
       title: 'ID Card Expiring Soon', 
@@ -67,7 +61,13 @@ const Dashboard = () => {
     },
   ];
 
-  const kudos = [
+  const kudos: Array<{
+    id: number;
+    message: string;
+    from: string;
+    date: string;
+    type: 'appreciation' | 'excellence' | 'teamwork';
+  }> = [
     {
       id: 1,
       message: 'Thanks for helping with the design review yesterday. Your insights were invaluable!',
@@ -127,7 +127,7 @@ const Dashboard = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <TeamCard manager={manager} members={teamMembers} />
+        <TeamCard />
         <AlertsCard alerts={alerts} />
         <KudosCard kudos={kudos} />
       </div>

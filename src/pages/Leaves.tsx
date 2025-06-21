@@ -61,7 +61,7 @@
         // Transform Map to array with color for UI
         const mapped = Object.entries(data).map(([type, balance]) => ({
           type,
-          ...balance,
+          ...(balance as { used: number; total: number }),
           color:
             type === 'Casual Leave' ? 'green' :
             type === 'Sick Leave' ? 'blue' :

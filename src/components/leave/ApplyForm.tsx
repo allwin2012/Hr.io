@@ -13,9 +13,10 @@ interface LeaveApplyFormProps {
   form: LeaveForm;
   onClose: () => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  refreshLeaves: () => Promise<void>;
 }
 
-const LeaveApplyForm = ({ show, form, onClose, onChange }: LeaveApplyFormProps) => {
+const LeaveApplyForm = ({ show, form, onClose, onChange, refreshLeaves }: LeaveApplyFormProps) => {
   if (!show) return null;
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -37,6 +38,7 @@ const LeaveApplyForm = ({ show, form, onClose, onChange }: LeaveApplyFormProps) 
 
       showSnackbar('Leave submitted successfully', 'success');
       onClose();
+      await refreshLeaves();
     } catch (err) {
       console.error(err);
       showSnackbar('Leave submission failed', 'error');

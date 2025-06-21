@@ -25,7 +25,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [newPasswordError, setNewPasswordError] = useState('');
   const [newPasswordMismatchError, setNewPasswordMismatchError] = useState('');
 
 
@@ -59,7 +58,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // handleSubmit is the function that handles the submission of the form
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isSignUp) {
@@ -134,7 +133,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   // Step 1: Send OTP to email
-  const handleSendOTP = async (e) => {
+  const handleSendOTP = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -163,7 +162,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   // Step 2: Verify OTP
-  const handleVerifyOTP = async (e) => {
+  const handleVerifyOTP = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -192,7 +191,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   // Step 3: Reset password
-  const handleResetPassword = async (e) => {
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (newPassword !== confirmNewPassword) {

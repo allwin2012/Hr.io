@@ -1,3 +1,5 @@
+import type { Employee } from '../../pages/HRDashboard';
+
 export interface LeaveBalance {
     type: string;
     used: number;
@@ -6,12 +8,13 @@ export interface LeaveBalance {
   }
   
   export interface LeaveRequest {
-    id: number;
+    _id: string;
     type: string;
     startDate: string;
     endDate: string;
     reason: string;
     status: 'Approved' | 'Pending' | 'Rejected';
+    employee?: Employee;
   }
   
   export interface LeaveForm {
