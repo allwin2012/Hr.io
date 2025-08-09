@@ -15,8 +15,16 @@
     const [showApplyForm, setShowApplyForm] = useState(false);
     const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
     const { showSnackbar } = useSnackbar();
-
+    //for calendar view
+    const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // 0-11
+    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     
+    
+    //handle month change
+    const handleMonthChange = (newMonth: number, newYear: number) => {
+      setSelectedMonth(newMonth);
+      setSelectedYear(newYear);
+    };
 
 
     const [leaveForm, setLeaveForm] = useState<LeaveForm>({
@@ -178,7 +186,11 @@
 
         </div>
 
-        {activeTab === 'calendar' && <LeaveCalendar leaveRequests={leaveRequests} />}
+        {activeTab === 'calendar' && <LeaveCalendar leaveRequests={leaveRequests} 
+         month={selectedMonth} 
+         year={selectedYear}
+         onMonthChange={handleMonthChange}
+        />}
         {activeTab === 'review' && <LeaveReviewList leaveRequests={reviewRequests} onStatusChange={handleStatusChange} />}
   {activeTab === 'list' && <LeaveList leaveRequests={leaveRequests} />}
 
