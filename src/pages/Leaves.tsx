@@ -71,7 +71,7 @@
           type,
           ...(balance as { used: number; total: number }),
           color:
-            type === 'Casual Leave' ? 'green' :
+            type === 'Casual Leave'  ? 'green' :
             type === 'Sick Leave' ? 'blue' :
             type === 'Earned Leave' ? 'purple' :
             'gray'
