@@ -1,16 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowDownUp, Check, Circle, CirclePlus, Clock, Filter, MessageSquare, SquareSplitVertical, Users, X } from 'lucide-react';
+import { CreateTaskModal } from '../components/task/CreateTaskModal';
 
 const Tasks = () => {
   const [activeTab, setActiveTab] = useState('todo');
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDelegateForm, setShowDelegateForm] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [viewMode, setViewMode] = useState('my'); // 'my' or 'team'
   const [selectedReportee, setSelectedReportee] = useState('all');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);  
   
+  const currentUser = {
+    id: localStorage.getItem('UserId'),
+    name: localStorage.getItem('userName'),
+    role: localStorage.getItem('userRole'),
+
+  };
+  
+
+    
+  const teamMembers = [
+    { _id: 'user-2', name: 'Alex Johnson', role: 'UI Designer' }, // Changed to _id
+    { _id: 'user-3', name: 'Sam Williams', role: 'UI Designer' },
+    { _id: 'user-4', name: 'Taylor Brown', role: 'Junior Designer' },
+  ];
   // Mock data
   const tasks = [
     {
@@ -60,34 +77,25 @@ const Tasks = () => {
     },
   ];
   
-  const [taskForm, setTaskForm] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-    priority: 'Medium',
-  });
-  
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setTaskForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Create task
+  // This function just triggers a refresh of the tasks list
+  const handleTaskCreated = () => {
+    setRefreshTrigger(prev => prev + 1); // Increment to trigger useEffect
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would normally submit the form data
-    setShowCreateForm(false);
-    // Reset form
-    setTaskForm({
-      title: '',
-      description: '',
-      dueDate: '',
-      priority: 'Medium',
-    });
-  };
-  
+
+  // useEffect to fetch tasks (will re-run when refreshTrigger changes)
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        // Mock API call - replace with actual implementation
+        console.log('Fetching tasks...');
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+      }
+    };
+    fetchTasks();
+  }, [refreshTrigger]);
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High':
@@ -114,12 +122,8 @@ const Tasks = () => {
     }
   };
   
-  // Mock data for reportees
-  const reportees = [
-    { id: 1, name: 'Alex Johnson', role: 'UI Designer' },
-    { id: 2, name: 'Sam Williams', role: 'UI Designer' },
-    { id: 3, name: 'Taylor Brown', role: 'Junior Designer' },
-  ];
+  // Mock data for reportees (using teamMembers)
+  const reportees = teamMembers;
   
   // Mock data for team tasks
   const teamTasks = [
@@ -154,7 +158,7 @@ const Tasks = () => {
       assignee: 'Taylor Brown',
     },
   ];
-  
+
   const [delegateForm, setDelegateForm] = useState({
     taskId: '',
     title: '',
@@ -438,94 +442,13 @@ const Tasks = () => {
       </div>
       
       {showCreateForm && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-bold text-gray-800 dark:text-white">Create New Task</h2>
-              <button 
-                onClick={() => setShowCreateForm(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="p-4">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Task Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={taskForm.title}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={taskForm.description}
-                  onChange={handleFormChange}
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500"
-                ></textarea>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Due Date
-                </label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={taskForm.dueDate}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Priority
-                </label>
-                <select
-                  name="priority"
-                  value={taskForm.priority}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                >
-                  Create Task
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      <CreateTaskModal
+  isOpen={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        onTaskCreated={handleTaskCreated} // Just pass the callback
+        currentUser={currentUser}
+        teamMembers={teamMembers}
+      />
       )}
       
       {/* Task Delegation Modal */}

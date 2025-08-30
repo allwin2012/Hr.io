@@ -112,8 +112,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           const greeting = `Hi, ${getGreeting()} ${userName} 🌞`;
           showSnackbar(greeting, 'success');
           localStorage.setItem('token', data.token);
-          localStorage.setItem('userName', data.user.name); // ✅ correct
-          localStorage.setItem('userEmail', data.user.email); // ✅ store email too
+          localStorage.setItem('userName', data.user.name); 
+          localStorage.setItem('UserId',data.user.id);
+          localStorage.setItem('userEmail', data.user.email);
           localStorage.setItem('userRole', data.user.role);
           localStorage.setItem('userDepartment', data.user.department);
           onLogin(); // trigger parent login logic
