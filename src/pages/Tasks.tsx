@@ -13,6 +13,9 @@ import {
   Trash2
 } from 'lucide-react';
 import { CreateTaskModal } from '../components/task/CreateTaskModal';
+import TaskCard from '../components/task/TaskCard';
+import EditTaskModal from '../components/task/EditTaskModal';
+
 
 type Task = {
   id: string; // mapped from _id
@@ -42,6 +45,7 @@ const Tasks = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({}); // per-task action loader
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
@@ -135,6 +139,25 @@ const Tasks = () => {
     return res.json();
   };
 
+  // Edit task (from EditTaskModal)
+  const handleEditSubmit = async (payload: Record<string, any>) => {
+  if (!selectedTask) return;
+  try {
+    setTaskLoading(selectedTask.id, true);
+    await updateTaskApi(selectedTask.id, payload);
+    // reflect changes locally (optimistic) or re-fetch
+    setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, ...payload } : t)));
+    // optionally refresh from backend: setRefreshTrigger(p => p+1);
+  } catch (err) {
+    console.error('Edit failed', err);
+    alert('Failed to save changes. See console.');
+  } finally {
+    setTaskLoading(selectedTask.id, false);
+    setShowEditForm(false);
+  }
+};
+
+
   // Delete task
   const deleteTaskApi = async (taskId: string) => {
     const token = localStorage.getItem('token');
@@ -196,6 +219,12 @@ const Tasks = () => {
     }
   };
 
+  // open edit modal for selected task
+const handleEditTask = (task: Task) => {
+  setSelectedTask(task);
+  setShowEditForm(true);
+};
+
   // Delete handler (confirm + delete)
   const handleDeleteTask = async (task: Task) => {
     // permission check on frontend (UX only) - backend enforces security
@@ -243,6 +272,7 @@ const Tasks = () => {
 
   const handleDelegateTask = (task: Task) => {
     setSelectedTask(task);
+     setShowEditForm(true);
     setDelegateForm({
       taskId: task.id.toString(),
       title: task.title,
@@ -333,22 +363,20 @@ const Tasks = () => {
       <div className="mb-6">
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
           <button
-            className={`py-2 px-4 font-medium text-sm flex items-center ${
-              viewMode === 'my'
+            className={`py-2 px-4 font-medium text-sm flex items-center ${viewMode === 'my'
                 ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
+              }`}
             onClick={() => setViewMode('my')}
           >
             <Circle size={16} className="mr-2" />
             My Tasks
           </button>
           <button
-            className={`py-2 px-4 font-medium text-sm flex items-center ${
-              viewMode === 'team'
+            className={`py-2 px-4 font-medium text-sm flex items-center ${viewMode === 'team'
                 ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
+              }`}
             onClick={() => setViewMode('team')}
           >
             <Users size={16} className="mr-2" />
@@ -358,11 +386,10 @@ const Tasks = () => {
 
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
-            className={`py-2 px-4 font-medium text-sm flex items-center ${
-              activeTab === 'todo'
+            className={`py-2 px-4 font-medium text-sm flex items-center ${activeTab === 'todo'
                 ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
+              }`}
             onClick={() => setActiveTab('todo')}
           >
             <Circle size={16} className="mr-2" />
@@ -372,11 +399,10 @@ const Tasks = () => {
             </span>
           </button>
           <button
-            className={`py-2 px-4 font-medium text-sm flex items-center ${
-              activeTab === 'inprogress'
+            className={`py-2 px-4 font-medium text-sm flex items-center ${activeTab === 'inprogress'
                 ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
+              }`}
             onClick={() => setActiveTab('inprogress')}
           >
             <Clock size={16} className="mr-2" />
@@ -386,11 +412,10 @@ const Tasks = () => {
             </span>
           </button>
           <button
-            className={`py-2 px-4 font-medium text-sm flex items-center ${
-              activeTab === 'completed'
+            className={`py-2 px-4 font-medium text-sm flex items-center ${activeTab === 'completed'
                 ? 'border-b-2 border-green-500 text-green-600 dark:text-green-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
+              }`}
             onClick={() => setActiveTab('completed')}
           >
             <Check size={16} className="mr-2" />
@@ -456,77 +481,60 @@ const Tasks = () => {
       </div>
 
       <div className="space-y-4">
-        {sortedTasks.length > 0 ? (
-          sortedTasks.map((task) => {
-            const isLoading = !!actionLoading[task.id];
-            const assigneeName = typeof task.assignee === 'string' ? task.assignee : (task.assignee as any)?.name;
-            const creatorId = (() => {
-              if (!task.createdBy) return null;
-              if (typeof task.createdBy === 'string') return task.createdBy;
-              return (task.createdBy as any)?._id ?? null;
-            })();
+  {sortedTasks.length > 0 ? (
+    sortedTasks.map((task) => {
+      const isLoading = !!actionLoading[task.id];
+      const assigneeName = typeof task.assignee === 'string' ? task.assignee : (task.assignee as any)?.name;
 
-            const canDelete = creatorId === currentUser.id || currentUser.role === 'Admin' || currentUser.role === 'SuperAdmin';
+      // optional front-end permission check used to show/hide delete button in TaskCard
+      const creatorId = (() => {
+        if (!task.createdBy) return null;
+        if (typeof task.createdBy === 'string') return task.createdBy;
+        return (task.createdBy as any)?._id ?? null;
+      })();
 
-            return (
-              <div key={task.id} className="card p-4 hover:shadow-md transition-shadow">
-                <div className="flex justify-between">
-                  <div className="flex items-start">
-                    <div className="mt-1 mr-3">
-                      {task.status === 'todo' ? <Circle size={18} className="text-gray-400" /> : task.status === 'inprogress' ? <Clock size={18} className="text-yellow-500" /> : <Check size={18} className="text-green-500" />}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">{task.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{task.description}</p>
-                      <div className="flex flex-wrap items-center mt-2 space-x-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPriorityColor(task.priority || '')}`}>{task.priority}</span>
-                        <span className={`text-xs ${isTaskOverdue(task.dueDate) ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                          Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
-                          {isTaskOverdue(task.dueDate) && ' (Overdue)'}
-                        </span>
-                        {assigneeName && <span className="text-xs text-gray-500 dark:text-gray-400"> • Assignee: {assigneeName}</span>}
-                      </div>
-                    </div>
-                  </div>
+      const canDelete = creatorId === currentUser.id || currentUser.role === 'Admin' || currentUser.role === 'SuperAdmin';
 
-                  <div className="flex space-x-2 items-center">
-                    <button disabled={isLoading} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Start Task" onClick={() => startTask(task)}>
-                      <Clock size={18} />
-                    </button>
-                    <button disabled={isLoading} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Mark Complete" onClick={() => markComplete(task)}>
-                      <Check size={18} />
-                    </button>
-                    <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Add Comment">
-                      <MessageSquare size={18} />
-                    </button>
-                    <button disabled={isLoading} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Delegate Task" onClick={() => handleDelegateTask(task)}>
-                      <Users size={18} />
-                    </button>
+      return (
+        <TaskCard
+          key={task.id}
+          task={task}
+          loading={isLoading}
+          onStart={() => startTask(task)}
+          onComplete={() => markComplete(task)}
+          // this will open your delegate modal because handleDelegateTask sets selectedTask & showDelegateForm
+          onDelegate={() => handleDelegateTask(task)}
+          onDelete={() => handleDeleteTask(task)}
+          onEdit={() => handleEditTask(task)}
+          onComment={() => {/* implement later */}}
+        />
+      );
+    })
+  ) : (
+    <div className="text-center py-10 card">
+      <Check size={48} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+      <p className="text-gray-500 dark:text-gray-400">No tasks found.</p>
+      <button onClick={() => setShowCreateForm(true)} className="mt-4 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+        Create a new task
+      </button>
+    </div>
+  )}
+</div>
 
-                    {canDelete && (
-                      <button disabled={isLoading} className="text-red-500 hover:text-red-700" title="Delete Task" onClick={() => handleDeleteTask(task)}>
-                        <Trash2 size={18} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="text-center py-10 card">
-            <Check size={48} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-            <p className="text-gray-500 dark:text-gray-400">No tasks found.</p>
-            <button onClick={() => setShowCreateForm(true)} className="mt-4 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
-              Create a new task
-            </button>
-          </div>
-        )}
-      </div>
 
       {showCreateForm && (
         <CreateTaskModal isOpen={showCreateForm} onClose={() => setShowCreateForm(false)} onTaskCreated={handleTaskCreated} currentUser={currentUser} teamMembers={teamMembers} />
       )}
+
+      {showEditForm && selectedTask && (
+  <EditTaskModal
+    isOpen={showEditForm}
+    task={selectedTask}
+    onClose={() => setShowEditForm(false)}
+    onSubmit={handleEditSubmit}
+  />
+)}
+
 
       {/* Task Delegation Modal */}
       {showDelegateForm && selectedTask && (
@@ -611,16 +619,3 @@ const Tasks = () => {
 
 export default Tasks;
 
-// Helper: priority color function (kept outside render for clarity)
-function getPriorityColor(priority: string) {
-  switch (priority) {
-    case 'High':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-    case 'Medium':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    case 'Low':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-  }
-}
