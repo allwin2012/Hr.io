@@ -17,6 +17,7 @@
     "@mui/styled-engine-sc": "^7.1.0",
     "date-fns": "^4.1.0",
     "i": "^0.3.7",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.510.0",
     "notistack": "^3.0.2",
     "react": "19.0.0",
